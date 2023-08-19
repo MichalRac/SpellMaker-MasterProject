@@ -17,6 +17,8 @@ public class UnitController : MonoBehaviour
     [SerializeField] private List<SkinnedMeshRenderer> meshRenderers;
     [SerializeField] private Material altMaterial;
 
+    [SerializeField] private UnitEffectController _unitEffectController;
+
     public void Setup(Unit unit)
     {
         _unit = unit;
@@ -36,12 +38,16 @@ public class UnitController : MonoBehaviour
                 break;
         }
 
-        if(unit.UnitData.UnitIdentifier.TeamId != 0)
+        var isAlly = unit.UnitData.UnitIdentifier.TeamId == 0;
+        _unitEffectController.Setup(isAlly);
+
+        if (!isAlly)
         {
             foreach (var meshRenderer in meshRenderers)
             {
                 meshRenderer.material = altMaterial;
             }
+
 
             modelHandle.transform.Rotate(new Vector3(0, 180, 0));
         }

@@ -1,4 +1,6 @@
+using Commands;
 using SMUBE.AI;
+using SMUBE.Commands.SpecificCommands._Common;
 using SMUBE.Core;
 using SMUBE.Units;
 using SMUBE.Units.CharacterTypes;
@@ -98,11 +100,30 @@ public class BattleService : MonoBehaviour
     {
         var options = nextActiveUnit.ViableCommands;
 
-        _actionPicker.SetupActionPicker(options);
+        _actionPicker.SetupActionPicker(options, OnActionPicked);
     }
 
     private void ProcessCPUTurn(Unit nextActiveUnit)
     {
         nextActiveUnit.AiModel.ResolveNextCommand(_battleCore.currentStateModel, nextActiveUnit.UnitData.UnitIdentifier);
+    }
+
+    private void OnActionPicked(ICommand command)
+    {
+    }
+
+    private CommandArgs GetCommandArgs(CommandArgsValidator command)
+    {
+        switch (command)
+        {
+            case OneToZeroArgsValidator:
+                break;
+            case OneToOneArgsValidator:
+                break;
+            default:
+                break;
+        }
+
+        return null;
     }
 }

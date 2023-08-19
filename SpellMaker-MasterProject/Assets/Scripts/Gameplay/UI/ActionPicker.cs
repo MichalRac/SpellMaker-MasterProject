@@ -10,13 +10,17 @@ public class ActionPicker : MonoBehaviour
     [SerializeField] private ActionPickEntry _actionPick_InplacePrefab;
     private List<ActionPickEntry> activeAPEs = new List<ActionPickEntry>();
 
-    public void SetupActionPicker(List<ICommand> commands)
+    public void SetupActionPicker(List<ICommand> commands, Action<ICommand> onActionPicked)
     {
         foreach (var command in commands)
         {
             var ape = Instantiate(_actionPick_InplacePrefab, transform);
 
-            ape.Setup(() => CleanAPEs(), Enum.GetName(typeof(CommandId), command.CommandId));
+            ape.Setup(
+                () => {
+                    CleanAPEs();
+                    onActionPicked?.Invoke(command);
+                }, Enum.GetName(typeof(CommandId), command.CommandId));
 
             activeAPEs.Add(ape);
 
