@@ -7,6 +7,16 @@ using UnityEngine;
 public class UnitController : MonoBehaviour
 {
     private Unit _unit;
+    public Unit Unit => _unit;
+
+    [SerializeField] private UnitAnimationHandler _unitAnimationHandler;
+    public UnitAnimationHandler UnitAnimationHandler => _unitAnimationHandler;
+
+    [SerializeField] private UnitAnimationEventHandler _unitAnimationEventHandler;
+    public UnitAnimationEventHandler UnitAnimationEvemtHandler => _unitAnimationEventHandler;
+
+    private Vector3 _initPosition;
+    public Vector3 InitPosition => _initPosition;
 
     [SerializeField] private GameObject HunterModel;
     [SerializeField] private GameObject ScholarModel;
@@ -18,10 +28,14 @@ public class UnitController : MonoBehaviour
     [SerializeField] private Material altMaterial;
 
     [SerializeField] private UnitEffectController _unitEffectController;
+    public UnitEffectController UnitEffectController => _unitEffectController;
 
-    public void Setup(Unit unit)
+    [SerializeField] private InfoPanel _infoPanel;
+
+    public void Setup(Unit unit, Vector3 initPosition)
     {
         _unit = unit;
+        _initPosition = initPosition;
 
         switch (unit.UnitData.UnitStats.BaseCharacter)
         {
@@ -47,9 +61,18 @@ public class UnitController : MonoBehaviour
             {
                 meshRenderer.material = altMaterial;
             }
-
-
-            modelHandle.transform.Rotate(new Vector3(0, 180, 0));
         }
+
+        UpdateInfoPanel();
+    }
+
+    public void UpdateInfoPanel()
+    {
+        _infoPanel.UpdateInfoPanel(this);
+    }
+
+    public void UpdatePosition()
+    {
+        modelHandle.position = InitPosition;
     }
 }
