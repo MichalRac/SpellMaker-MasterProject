@@ -1,12 +1,10 @@
 using Assets.Scripts.Gameplay.Unit;
 using Commands;
 using SMUBE.AI;
-using SMUBE.Commands.SpecificCommands._Common;
 using SMUBE.Core;
 using SMUBE.Units;
 using SMUBE.Units.CharacterTypes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -51,15 +49,15 @@ public class BattleService : MonoBehaviour
 
     private void InitializeGame()
     {
-        var aiModel = new RandomAIModel();
+        Func<AIModel> aiModelProvider = () => new RandomAIModel(false);
 
-        var unit1team1 = UnitHelper.CreateUnit<Squire>(PLAYER_TEAM_ID, aiModel);
-        var unit2team1 = UnitHelper.CreateUnit<Hunter>(PLAYER_TEAM_ID, aiModel);
-        var unit3team1 = UnitHelper.CreateUnit<Scholar>(PLAYER_TEAM_ID, aiModel);
+        var unit1team1 = UnitHelper.CreateUnit<Squire>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
+        var unit2team1 = UnitHelper.CreateUnit<Hunter>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
+        var unit3team1 = UnitHelper.CreateUnit<Scholar>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
 
-        var unit1team2 = UnitHelper.CreateUnit<Squire>(CPU_TEAM_ID, aiModel);
-        var unit2team2 = UnitHelper.CreateUnit<Hunter>(CPU_TEAM_ID, aiModel);
-        var unit3team2 = UnitHelper.CreateUnit<Scholar>(CPU_TEAM_ID, aiModel);
+        var unit1team2 = UnitHelper.CreateUnit<Squire>(CPU_TEAM_ID, aiModelProvider?.Invoke());
+        var unit2team2 = UnitHelper.CreateUnit<Hunter>(CPU_TEAM_ID, aiModelProvider?.Invoke());
+        var unit3team2 = UnitHelper.CreateUnit<Scholar>(CPU_TEAM_ID, aiModelProvider?.Invoke());
 
 
         var units = new List<Unit>()

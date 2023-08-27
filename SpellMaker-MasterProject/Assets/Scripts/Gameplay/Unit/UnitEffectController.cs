@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class UnitEffectController : MonoBehaviour
@@ -13,6 +14,10 @@ public class UnitEffectController : MonoBehaviour
     [SerializeField] private MeshRenderer _selectorMeshRenderer;
     [SerializeField] private Material _allyMaterial;
     [SerializeField] private Material _enemyMaterial;
+
+    [SerializeField] private GameObject _defendVFX;
+    [SerializeField] private GameObject _healVFX;
+    [SerializeField] private GameObject _heavyDmgVFX;
 
     private Material _defaultMaterial;
     private bool _isAlly;
@@ -42,5 +47,25 @@ public class UnitEffectController : MonoBehaviour
     public void SetSelected(bool value)
     {
         _selector.SetActive(value);
+    }
+
+    public async void PlayDefendVFX()
+    {
+        _defendVFX.SetActive(true);
+        await Task.Delay(1000);
+        _defendVFX.SetActive(false);
+    }
+
+    public async void PlayHealVFX()
+    {
+        _healVFX.SetActive(true);
+        await Task.Delay(1000);
+        _healVFX.SetActive(false);
+    }
+    public async void PlayHeavyDmgVFX()
+    {
+        _heavyDmgVFX.SetActive(true);
+        await Task.Delay(250);
+        _heavyDmgVFX.SetActive(false);
     }
 }

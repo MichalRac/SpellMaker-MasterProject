@@ -40,14 +40,49 @@ public class TargetPicker
     {
         switch (validator)
         {
-            case OneToZeroArgsValidator:
+            case OneToSelfArgsValidator:
                 return new CommonArgs(activeUnit.UnitData, null, BattleStateModel);
             case OneToOneArgsValidator:
                 var unit = await PickEnemyTarget(activeUnit.UnitData.UnitIdentifier.TeamId, AllUnits);
                 return new CommonArgs(activeUnit.UnitData, new List<UnitData>() { unit.UnitData }, BattleStateModel) ;
+            case OneToEveryArgsValidator oneToEveryArgsValidator:
+                List<UnitData> viableTargets = new();
+                if(oneToEveryArgsValidator.ArgsConstraint == ArgsConstraint.Ally)
+                {
+                    var allViableTargets = BattleStateModel.GetTeamUnits(activeUnit.UnitData.UnitIdentifier.TeamId);
+                    foreach (var target in allViableTargets)
+                    {
+                        viableTargets.Add(target.UnitData);
+                    }
+                }
+                else if(oneToEveryArgsValidator.ArgsConstraint == ArgsConstraint.Enemy)
+                {
+                    var allViableTargets = BattleStateModel.GetTeamUnits(activeUnit.UnitData.UnitIdentifier.TeamId == 0 ? 1 : 0);
+                    foreach (var target in allViableTargets)
+                    {
+                        viableTargets.Add(target.UnitData);
+                    }
+                }
+                else if(oneToEveryArgsValidator.ArgsConstraint == ArgsConstraint.None)
+                {
+                    foreach (var target in BattleStateModel.GetTeamUnits(0))
+                    {
+                        viableTargets.Add(target.UnitData);
+                    }
+                    foreach (var target in BattleStateModel.GetTeamUnits(1))
+                    {
+                        viableTargets.Add(target.UnitData);
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+                return new CommonArgs(activeUnit.UnitData, viableTargets, BattleStateModel);
             default:
-                return null;
+                throw new NotImplementedException();
         }
+        return null;
     }
 
     public async Task<Unit> PickEnemyTarget(int activeUnitTeamId, List<UnitController> allUnits)
