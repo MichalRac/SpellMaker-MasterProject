@@ -33,10 +33,9 @@ public class BattleService : MonoBehaviour
         _commandAnimationRunner = new StatelessCommandAnimationRunner();
     }
 
-    // Start is called before the first frame update
-    async void Start()
+    public async void BeginGame(List<Unit> units)
     {
-        InitializeGame();
+        InitializeGame(units);
         
         while(!_battleCore.currentStateModel.IsFinished(out var _))
         {
@@ -47,8 +46,9 @@ public class BattleService : MonoBehaviour
         Debug.Log($"Team {winnerTeam} won!");
     }
 
-    private void InitializeGame()
+    private void InitializeGame(List<Unit> units)
     {
+/*        
         Func<AIModel> aiModelProvider = () => new RandomAIModel(false);
 
         var unit1team1 = UnitHelper.CreateUnit<Squire>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
@@ -70,10 +70,10 @@ public class BattleService : MonoBehaviour
             unit2team2,
             unit3team2,
         };
-
+*/
         _battleCore = new BattleCore(units);
 
-        SpawnUnits(unit1team1, unit2team1, unit3team1, unit1team2, unit2team2, unit3team2);
+        SpawnUnits(units.ToArray());
         _targetPicker = new TargetPicker(_battleCore.currentStateModel, _unitControllers);
     }
 

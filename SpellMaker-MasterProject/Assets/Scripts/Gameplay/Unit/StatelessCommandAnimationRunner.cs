@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using static PlasticPipe.PlasticProtocol.Messages.NegotiationCommand;
 
 namespace Assets.Scripts.Gameplay.Unit
 {
