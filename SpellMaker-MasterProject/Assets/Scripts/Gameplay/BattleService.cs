@@ -1,6 +1,7 @@
 using Assets.Scripts.Gameplay.Unit;
 using Commands;
 using SMUBE.AI;
+using SMUBE.AI.BehaviorTree;
 using SMUBE.Core;
 using SMUBE.Units;
 using SMUBE.Units.CharacterTypes;
@@ -20,6 +21,8 @@ public class BattleService : MonoBehaviour
     [SerializeField] private UnitController unitControllerPrefab;
     [SerializeField] private SpawnPointProvider spawnPointProvider;
     [SerializeField] private Transform _unitContainer;
+
+    [SerializeField] private CameraController _cameraController;
 
     private List<UnitController> _unitControllers = new();
 
@@ -48,31 +51,7 @@ public class BattleService : MonoBehaviour
 
     private void InitializeGame(List<Unit> units)
     {
-/*        
-        Func<AIModel> aiModelProvider = () => new RandomAIModel(false);
-
-        var unit1team1 = UnitHelper.CreateUnit<Squire>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
-        var unit2team1 = UnitHelper.CreateUnit<Hunter>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
-        var unit3team1 = UnitHelper.CreateUnit<Scholar>(PLAYER_TEAM_ID, aiModelProvider?.Invoke());
-
-        var unit1team2 = UnitHelper.CreateUnit<Squire>(CPU_TEAM_ID, aiModelProvider?.Invoke());
-        var unit2team2 = UnitHelper.CreateUnit<Hunter>(CPU_TEAM_ID, aiModelProvider?.Invoke());
-        var unit3team2 = UnitHelper.CreateUnit<Scholar>(CPU_TEAM_ID, aiModelProvider?.Invoke());
-
-
-        var units = new List<Unit>()
-        {
-            unit1team1,
-            unit2team1,
-            unit3team1,
-
-            unit1team2,
-            unit2team2,
-            unit3team2,
-        };
-*/
         _battleCore = new BattleCore(units);
-
         SpawnUnits(units.ToArray());
         _targetPicker = new TargetPicker(_battleCore.currentStateModel, _unitControllers);
     }
@@ -90,12 +69,13 @@ public class BattleService : MonoBehaviour
             var teamId = newUnit.UnitData.UnitIdentifier.TeamId;
             var newUnitController = Instantiate(unitControllerPrefab, _unitContainer);
             newUnitController.transform.position = teamId == 0 
-                ? team1SpawnPoints[team1SpawnCount++].transform.position 
+                ? team1SpawnPoints[team1SpawnCount++].transform.position
                 : team2SpawnPoints[team2SpawnCount++].transform.position;
 
-            newUnitController.Setup(newUnit, newUnitController.transform.position);
+            newUnitController.Setup(newUnit, newUnitController.transform.position, teamId == 0 ? team1SpawnCount : team2SpawnCount);
 
-            newUnitController.UnitAnimationHandler.RotateTowards(NavigationHelper.GetUnitAdjacentPosition(newUnitController));
+            var initRoatation = NavigationHelper.GetUnitAdjacentPosition(newUnitController);
+            newUnitController.UnitAnimationHandler.RotateTowards(initRoatation);
 
             _unitControllers.Add(newUnitController);
         }
@@ -116,6 +96,28 @@ public class BattleService : MonoBehaviour
         var isPlayerControlled = nextActiveUnit.UnitData.UnitIdentifier.TeamId == PLAYER_TEAM_ID;
 
         var activeUnitController = _unitControllers.Find((uc) => uc.Unit.UnitData.UnitIdentifier == _activeUnit.UnitData.UnitIdentifier);
+
+        if (isPlayerControlled)
+        {
+            switch (activeUnitController.SlotId)
+            {
+                case 1:
+                    _cameraController.SetCameraState(CameraControllerState.Slot1);
+                    break;
+                case 2:
+                    _cameraController.SetCameraState(CameraControllerState.Slot2);
+                    break;
+                case 3:
+                    _cameraController.SetCameraState(CameraControllerState.Slot3);
+                    break;
+            }
+
+        }
+        else
+        {
+            _cameraController.SetCameraState(CameraControllerState.Overview);
+        }
+
 
         activeUnitController.UnitEffectController.SetSelected(true);
 
@@ -151,7 +153,10 @@ public class BattleService : MonoBehaviour
     private async Task ProcessCPUTurn(Unit nextActiveUnit)
     {
         var command = nextActiveUnit.AiModel.ResolveNextCommand(_battleCore.currentStateModel, nextActiveUnit.UnitData.UnitIdentifier);
-        var commandArg = nextActiveUnit.AiModel.GetCommandArgs(command, _battleCore.currentStateModel, nextActiveUnit.UnitData.UnitIdentifier);
+
+        var commandArg = nextActiveUnit.AiModel is BehaviorTreeAIModel
+            ? command.ArgsCache
+            : nextActiveUnit.AiModel.GetCommandArgs(command, _battleCore.currentStateModel, nextActiveUnit.UnitData.UnitIdentifier);
 
         await _commandAnimationRunner.PerformActionVisual(_unitControllers, command, commandArg);
         _battleCore.currentStateModel.ExecuteCommand(command, commandArg);
@@ -160,6 +165,9 @@ public class BattleService : MonoBehaviour
     private async Task OnActionPicked(ICommand command)
     {
         var commandArgs = await GetCommandArgs(_activeUnit, command.CommandArgsValidator);
+
+        _cameraController.SetCameraState(CameraControllerState.Overview);
+
         await _commandAnimationRunner.PerformActionVisual(_unitControllers, command, commandArgs);
 
         _battleCore.currentStateModel.ExecuteCommand(command, commandArgs);
@@ -177,7 +185,7 @@ public class BattleService : MonoBehaviour
             if(uc.Unit.UnitData.UnitStats.CurrentHealth <= 0)
             {
                 _commandAnimationRunner.ApplyDeath(uc);
-                return;
+                continue;
             }
 
             await _commandAnimationRunner.PerformEffectVisual(uc);

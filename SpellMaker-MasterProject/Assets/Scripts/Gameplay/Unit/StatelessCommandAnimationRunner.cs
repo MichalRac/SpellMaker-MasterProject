@@ -1,6 +1,7 @@
 ﻿using Commands;
 using Commands.SpecificCommands._Common;
 using Commands.SpecificCommands.BaseAttack;
+using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using SMUBE.Commands.Effects;
 using SMUBE.Commands.SpecificCommands.BaseBlock;
@@ -109,13 +110,15 @@ namespace Assets.Scripts.Gameplay.Unit
             var unitController = unitControllers.Find(uc => uc.Unit.UnitData.UnitIdentifier == commandArgs.ActiveUnit.UnitIdentifier);
             List<UnitController> targetUnits = new();
 
+            List<UniTask> tasks = new List<UniTask>();
             foreach (var targetUnit in commandArgs.TargetUnits)
             {
                 var targetUnitController = unitControllers.Find(uc => uc.Unit.UnitData.UnitIdentifier == targetUnit.UnitIdentifier);
                 targetUnits.Add(targetUnitController);
 
-                targetUnitController.UnitEffectController.PlayDefendVFX();
+                tasks.Add(targetUnitController.UnitEffectController.PlayDefendVFX());
             }
+            await UniTask.WhenAll(tasks);
         }
 
         private async Task HealAllSequence(List<UnitController> unitControllers, ICommand command, CommandArgs commandArgs)
@@ -123,13 +126,15 @@ namespace Assets.Scripts.Gameplay.Unit
             var unitController = unitControllers.Find(uc => uc.Unit.UnitData.UnitIdentifier == commandArgs.ActiveUnit.UnitIdentifier);
             List<UnitController> targetUnits = new();
 
+            List<UniTask> tasks = new List<UniTask>();
             foreach (var targetUnit in commandArgs.TargetUnits)
             {
                 var targetUnitController = unitControllers.Find(uc => uc.Unit.UnitData.UnitIdentifier == targetUnit.UnitIdentifier);
                 targetUnits.Add(targetUnitController);
 
-                targetUnitController.UnitEffectController.PlayHealVFX();
+                tasks.Add(targetUnitController.UnitEffectController.PlayHealVFX());
             }
+            await UniTask.WhenAll(tasks);
         }
 
         public async Task HeavyAttackSequence(List<UnitController> unitControllers, ICommand command, CommandArgs commandArgs)

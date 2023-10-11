@@ -32,10 +32,13 @@ public class UnitController : MonoBehaviour
 
     [SerializeField] private InfoPanel _infoPanel;
 
-    public void Setup(Unit unit, Vector3 initPosition)
+    public int SlotId { get; private set; }
+
+    public void Setup(Unit unit, Vector3 initPosition, int slotId)
     {
         _unit = unit;
         _initPosition = initPosition;
+        SlotId = slotId;
 
         switch (unit.UnitData.UnitStats.BaseCharacter)
         {

@@ -1,17 +1,35 @@
 using Mono.Cecil;
 using SMUBE.AI;
+using SMUBE.AI.BehaviorTree;
+using SMUBE.AI.DecisionTree;
+using SMUBE.AI.GoalOrientedBehavior;
+using SMUBE.AI.StateMachine;
 using SMUBE.Units;
 using SMUBE.Units.CharacterTypes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
+public enum AISetup
+{
+    Random = 0,
+    DT = 1,
+    FSA = 2,
+    BT = 3,
+    GOB = 4,
+}
 
 public class GameConfiguration : MonoBehaviour
 {
     [SerializeField] private List<CharacterSlotEntry> team1CharacterSlots;
     [SerializeField] private List<CharacterSlotEntry> team2CharacterSlots;
+    [SerializeField] private TextMeshProUGUI _selectedAILabel;
+
+    private AISetup _selectedAISetup = AISetup.DT;
 
     private Dictionary<int, List<BaseCharacterType>> _configuration = new();
 
@@ -39,6 +57,8 @@ public class GameConfiguration : MonoBehaviour
 
         RefeshControlButtonState(team1CharacterSlots);
         RefeshControlButtonState(team2CharacterSlots);
+
+        UpdateSelectedAILabel();
     }
 
     private void OnTeam1UnitAdded(int slotId)
@@ -113,9 +133,77 @@ public class GameConfiguration : MonoBehaviour
         }
     }
 
+    public void SelectNextAI()
+    {
+        if (_selectedAISetup == AISetup.GOB)
+        {
+            _selectedAISetup = AISetup.Random;
+        }
+        else
+        {
+            _selectedAISetup++;
+        }
+        UpdateSelectedAILabel();
+    }
+
+    public void SelectPreviousAI()
+    {
+        if (_selectedAISetup == AISetup.Random)
+        {
+            _selectedAISetup = AISetup.GOB;
+        }
+        else
+        {
+            _selectedAISetup--;
+        }
+        UpdateSelectedAILabel();
+    }
+
+    private void UpdateSelectedAILabel()
+    {
+        switch (_selectedAISetup)
+        {
+            case AISetup.Random:
+                _selectedAILabel.text = "Random AI";
+                break;
+            case AISetup.DT:
+                _selectedAILabel.text = "Decision Tree AI";
+                break;
+            case AISetup.FSA:
+                _selectedAILabel.text = "Finite State Automata AI";
+                break;
+            case AISetup.BT:
+                _selectedAILabel.text = "Behavior Tree AI";
+                break;
+            case AISetup.GOB:
+                _selectedAILabel.text = "Goal Oriented Behavior AI";
+                break;
+        }
+    }
+
     public List<Unit> GetGameConfiguration()
     {
-        Func<AIModel> aiModelProvider = () => new RandomAIModel(false);
+        Func<AIModel> aiModelProvider = null;
+
+        switch (_selectedAISetup)
+        {
+            case AISetup.Random:
+                aiModelProvider = () => new RandomAIModel(false);
+                break;
+            case AISetup.DT:
+                aiModelProvider = () => new DecisionTreeAIModel(false);
+                break;
+            case AISetup.FSA:
+                aiModelProvider = () => new StateMachineAIModel(null, false);
+                break;
+            case AISetup.BT:
+                aiModelProvider = () => new BehaviorTreeAIModel(false);
+                break;
+            case AISetup.GOB:
+                aiModelProvider = () => new GoalOrientedBehaviorAIModel(false);
+                break;
+        }
+
         var units = new List<Unit>();
 
         foreach (var team1Unit in team1CharacterSlots)

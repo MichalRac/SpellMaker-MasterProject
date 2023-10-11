@@ -8,6 +8,7 @@ public enum MenuMode
 
     Title = 1,
     GameConfiguration = 2,
+    Ingame = 3,
 }
 
 public class MenuRoot : MonoBehaviour
@@ -15,6 +16,12 @@ public class MenuRoot : MonoBehaviour
     [SerializeField] private TitlePage _titlePage;
     [SerializeField] private GameConfiguration _gameConfiguration;
     [SerializeField] private BattleService _battleService;
+    [SerializeField] private ActionPicker _actionPicker;
+
+    private void Awake()
+    {
+        SwitchToTitle();
+    }
 
     public void SwitchToMenuMode(MenuMode menuMode)
     {
@@ -24,15 +31,24 @@ public class MenuRoot : MonoBehaviour
                 gameObject.SetActive(false);
                 _titlePage.gameObject.SetActive(false);
                 _gameConfiguration.gameObject.SetActive(false);
+                _actionPicker.gameObject.SetActive(false);
                 break;
             case MenuMode.Title:
                 _titlePage.gameObject.SetActive(true);
                 _gameConfiguration.gameObject.SetActive(false);
+                _actionPicker.gameObject.SetActive(false);
                 break;
             case MenuMode.GameConfiguration:
                 _titlePage.gameObject.SetActive(false);
                 _gameConfiguration.gameObject.SetActive(true);
                 _gameConfiguration.BeginSetup();
+                _actionPicker.gameObject.SetActive(false);
+                break;
+            case MenuMode.Ingame:
+                gameObject.SetActive(false);
+                _titlePage.gameObject.SetActive(false);
+                _gameConfiguration.gameObject.SetActive(false);
+                _actionPicker.gameObject.SetActive(true);
                 break;
             default:
                 break;
@@ -51,7 +67,7 @@ public class MenuRoot : MonoBehaviour
 
     public void SwitchToBattle()
     {
-        SwitchToMenuMode(MenuMode.None);
+        SwitchToMenuMode(MenuMode.Ingame);
         var units = _gameConfiguration.GetGameConfiguration();
         _battleService.BeginGame(units);
     }

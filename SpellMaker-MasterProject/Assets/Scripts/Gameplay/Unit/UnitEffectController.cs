@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -49,14 +50,14 @@ public class UnitEffectController : MonoBehaviour
         _selector.SetActive(value);
     }
 
-    public async void PlayDefendVFX()
+    public async UniTask PlayDefendVFX()
     {
         _defendVFX.SetActive(true);
         await Task.Delay(1000);
         _defendVFX.SetActive(false);
     }
 
-    public async void PlayHealVFX()
+    public async UniTask PlayHealVFX()
     {
         _healVFX.SetActive(true);
         await Task.Delay(1000);
