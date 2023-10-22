@@ -9,6 +9,7 @@ public enum CameraControllerState
     Slot1 = 1,
     Slot2 = 2,
     Slot3 = 3,
+    Title = 4,
 }
 
 public class CameraController : MonoBehaviour
@@ -55,12 +56,16 @@ public class CameraController : MonoBehaviour
                 RotateCamera(new Vector3(24.87f, -90f, 0f));
                 break;
             case CameraControllerState.Slot2:
-                MoveCameraHandle(new Vector3(6.87f, 3.84f +2.21f, 3.25f - 0.31f));
+                MoveCameraHandle(new Vector3(6.87f, 3.84f + 2.21f, 3.25f - 0.31f));
                 RotateCamera(new Vector3(24.87f + 14f, -120.5f, 0f));
                 break;
             case CameraControllerState.Slot3:
                 MoveCameraHandle(new Vector3(6.87f, 3.84f + 2.21f, -3.5f + 0.31f));
                 RotateCamera(new Vector3(24.87f + 14f, -67.7f, 0f));
+                break;
+            case CameraControllerState.Title:
+                MoveCameraHandle(new Vector3(6.79f, 3.8f, 6.54f));
+                RotateCamera(new Vector3(17.7f, -139.1f, 0f));
                 break;
         }
     }

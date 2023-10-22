@@ -21,6 +21,7 @@ public class BattleService : MonoBehaviour
     [SerializeField] private UnitController unitControllerPrefab;
     [SerializeField] private SpawnPointProvider spawnPointProvider;
     [SerializeField] private Transform _unitContainer;
+    [SerializeField] private GameSummary _gameSummary;
 
     [SerializeField] private CameraController _cameraController;
 
@@ -46,7 +47,15 @@ public class BattleService : MonoBehaviour
         }
 
         _battleCore.currentStateModel.IsFinished(out var winnerTeam);
-        Debug.Log($"Team {winnerTeam} won!");
+
+        await Task.Delay(1000);
+        _gameSummary.ShowSummary(winnerTeam == 0);
+
+        foreach(var unitController in _unitControllers) 
+        {
+            Destroy(unitController.gameObject);
+        }
+        _unitControllers.Clear();
     }
 
     private void InitializeGame(List<Unit> units)
